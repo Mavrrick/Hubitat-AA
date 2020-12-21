@@ -1,5 +1,5 @@
 /**
- *  Arlo Smartthings Mode
+ *  Arlo Hubitat Mode
  *
  *  Copyright 2018 Mavrrick
  *
@@ -14,7 +14,7 @@
  *
  */
 definition(
-    name: "Arlo Smartthings Mode",
+    name: "Arlo Hubitat Mode",
     namespace: "Mavrrick",
     author: "Mavrrick",
     description: "Trigger a recording based on device action. Repeat if enabled until condition has passed.",
@@ -40,9 +40,9 @@ preferences {
 
 def mainPage()
 {
-	dynamicPage(name: "mainPage", title: "Setup Smartthings Arlo Assistant Mode integration", uninstall: true, install: true)
+	dynamicPage(name: "mainPage", title: "Setup Hubitat Arlo Assistant Mode integration", uninstall: true, install: true)
 	{
-    	section(title: "Please name the Smartthings Arlo Assistant Mode") {
+    	section(title: "Please name the Hubitat Arlo Assistant Mode") {
         	label title: "Please name this Hubitat Arlo Mode", required: true, defaultValue: "Hubitat Arlo Mode"
         }
 		section("What will determine when this mode is active")
@@ -62,13 +62,6 @@ def mainPage()
 		{
             href "modeRulesetSetup", title: "Define rulesets for mode.", description: "Defin the Rulesets that will be active in mode."
 		}
-/*		section("Mode Action When triggered")
-		{
-	       	input name: "numOfSets", type: "number", title: "Number of rule sets", description: "How many different rule sets will you hae", required: true, range: "1...5", defaultValue: 1           	
-            href "modeCameraSetup", title: "Camera setup for mode.", description: "Camera setup for mode Action"
-			href "modeLightsOpt", title: "Light setup actions for mode.", description: "Define light actions for this mode"
-			href "notificationSetup", title: "Notification setup", description: "Notification values for smartapp"
-		}*/
 	}
 }
 
@@ -76,16 +69,15 @@ def modeDefine()
 {
 	dynamicPage(name: "modeDefine", title: "What will determine if this Arlo Assitant Mode is active", nextPage: "mainPage", uninstall: false, install: false)
 	{
-		section("Defin Smartthings Mode")
+		section("Defin Hubitat Mode")
 		{
- 			input "stmode", "mode", title: "Smartthings Mode that must be active", required: false, multiple: true 
+ 			input "stmode", "mode", title: "Hubitat Mode that must be active", required: false, multiple: true 
 //			input "presense", "capability.presenceSensor", title: "What presense check will be required", required: false
 		}
 
 		section("Alarm Mode State integration")
 		{
-			input "shmUseState", "bool", title: "Do you want to use the SHM/Location Alarm mode", required: false
-//			input "adtUseState", "bool", title: "Do you want to use the ADT/Smartthings Alarm Panel mode", required: false 
+			input "shmUseState", "bool", title: "Do you want to use the HSM Alarm State", required: false 
 			href "securityState", title: "Security system modes to use", description: "Select security modes that will apply"
 		}
 
@@ -147,20 +139,11 @@ def securityState()
 		section("Home Security Monitor mode selection")
 			{
             paragraph "Please select the SHM Security mode that will be used to identify this mode" 
-            paragraph "What Active alarm mode do you want to monitor for 1= Stay, 2=Away, 3=Disarmed. All other numberical valudes wil be ignored."
+            paragraph "What Active alarm mode do you want to monitor for 1= ArmedHome, 2=ArmedNight, 3=Disarmed. All other numberical valudes wil be ignored."
         	input "alarmtype1", "number", title: "What type of alarm do you want to trigger from?", required: false, defaultValue: 1        
             }
          }
-/*        if (settings.adtUseState) {
-		section("ADT Smartthings Alarm mode selection")
-			{
-            paragraph "Please select the ADT Smartthings Alarm mode that will be used to identify this mode"       	
-			input "panel", "capability.securitySystem", title: "Select ADT Panel for Alarm Status.", required: true
-			paragraph "What Active alarm mode do you want to monitor for 1= Arm/Stay, 2=Armed/Away, 3=Disarmed. All other numberical valudes wil be ignored."
-        	input "alarmtype2", "number", title: "What type of alarm do you want to trigger from?", required: false, defaultValue: 1        
-			}
-		} */
-        section ("Return to Arlo Smartthings Mode setup"){
+        section ("Return to Arlo Hubitat Mode setup"){
             href "modeDefine", title: "Return to the previous menu", description: "Return to the previous menu to complete setup."            
 		}
 	}
@@ -458,11 +441,8 @@ def initialize() {
 	if (stmode) {
 	    subscribe(location, "mode", modeTriggerEvt)
     	}
-    if (adtUseState) {
-    	subscribe(location, "securitySystemStatus", modeTriggerEvt)
-        }
     if (shmUseState) {    
-        subscribe(location, "alarmSystemStatus", modeTriggerEvt)
+        subscribe(location, "hsmStatus", modeTriggerEvt)
         }
     if (virtualSwitch) {
     	log.debug "Subscribing to virtualSwitch"
@@ -730,36 +710,23 @@ def timeModeTrigger(){
    }
 }
 
-// Method to activate when a mode defining state changes in Smartthings
+// Method to activate when a mode defining state changes in Hubitat
 def modeTriggerEvt(evt){
-    log.debug "${evt.device} has generated a ${evt.name} event with status of ${evt.value}. Checking to see if in mode for this Smartapp"
-/*    if (stmode) {
-    	def curMode = location.currentMode
-            stmode.findAll { it.value ==~ curMode } .each { 
-            state.modeMatch = true
-            log.debug "setting Mode match to true"
-            log.debug "modeMatch = ${state.modeMatch}" }
-*/    
+    log.debug "${evt.device} has generated a ${evt.name} event with status of ${evt.value}. Checking to see if in mode for this Smartapp"   
 	if (stmode && shmUseState) {
           	def curMode = location.currentMode
-/*            stmode.findAll { it.value ==~ curMode } .each { 
-            state.modeMatch = true
-            log.debug "setting Mode match to true"
-            }
-            log.debug "modeMatch = ${state.modeMatch}"
-            if (state.modeMatch == true) { */
             if (stmode =~ curMode) {
-    		def alarmState = location.currentState("alarmSystemStatus")?.value
-        	if (alarmState == "stay" && alarmtype1 == 1) {
-        	log.debug "Current alarm mode: ${alarmState}.Current SHM Smartthings alarm mode has been validated. Executing Action."
+    		def alarmState = evt.value
+        	if (alarmState == "armedHome" && alarmtype1 == 1) {
+        	log.debug "Current alarm mode: ${alarmState}.Current HSM  alarm mode has been validated. Executing Action."
             	modeNowActive()
                     }
-        	else if (alarmState == "away" && alarmtype1 == 2) {
-        	log.debug "Current alarm mode: ${alarmState}.Current SHM Smartthings alarm mode has been validated. Executing Action."
+        	else if (alarmState == "armedNight" && alarmtype1 == 2) {
+        	log.debug "Current alarm mode: ${alarmState}.Current HSM  alarm mode has been validated. Executing Action."
             	modeNowActive()
         	}
-            else if (alarmState == "off" && alarmtype1 == 3) {
-        		log.debug "Current alarm mode: ${alarmState}.Current SHM Smartthings alarm mode has been validated. Executing Action."
+            else if (alarmState == "disarmed" && alarmtype1 == 3) {
+        		log.debug "Current alarm mode: ${alarmState}.Current HSM S alarm mode has been validated. Executing Action."
             	modeNowActive()
         	}
             else {
@@ -769,59 +736,24 @@ def modeTriggerEvt(evt){
                 }
             }
             else {
-            log.debug "Smartthings mode did not validate. This action does not apply to this mode"
+            log.debug "Hubitat mode did not validate. This action does not apply to this mode"
             unsubscribe()
 	        runIn((5), initialize)
             }
             }
-        else if (stmode && adtUseState) {
-           	def curMode = location.currentMode
-            log.debug "Identified as using Smarthings mode and ADT Alarm Panel"
-/*            stmode.findAll { it.value ==~ curMode } .each { 
-            state.modeMatch = true
-            log.debug "setting Mode match to true"
-            }
-            log.debug "modeMatch = ${state.modeMatch}"
-            if (state.modeMatch == true) { */
-            if (stmode =~ curMode) {
-    				def alarmState = panel.currentSecuritySystemStatus
-        		if (alarmState == "armedStay" && alarmtype2 == 1) {
-        			log.debug "Current alarm mode: ${alarmState}.Current ADT Smartthings alarm mode has been validated. Executing Action."
-            		modeNowActive()
-            		}
-        		else if (alarmState == "armedAway" && alarmtype2 == 2) {
-        			log.debug "Current alarm mode: ${alarmState}.Current ADT Smartthings alarm mode has been validated. Executing Action."
-            		modeNowActive()
-        		}
-        		else if (alarmState == "disarmed" && alarmtype2 == 3) {
-        			log.debug "Current alarm mode: ${alarmState}.Current ADT Smartthings alarm mode has been validated. Executing Action."
-            		modeNowActive()
-        		}
-                else {
-            	log.debug "Alarm mode did not match with mode. This action does not apply to this mode"
-                unsubscribe()
- 		        runIn((5), initialize)
-                }
-            }
-            else {
-            	log.debug "Smartthings mode did not validate. This action does not apply to this mode"
-                unsubscribe()
- 		        runIn((5), initialize)
-                }
-        }
 		else if (shmUseState) {
-    	def alarmState = location.currentState("alarmSystemStatus")?.value
-        	log.debug "Identified to use ADT Alarm Mode. Checking what alarm mode is active"
-        	if (alarmState == "stay" && alarmtype1 == 1) {
-        		log.debug "Current alarm mode: ${alarmState}.Current SHM Smartthings alarm mode has been validated. Executing Action."
+    	def alarmState = evt.value
+        	log.debug "Identified to use HSM Alarm Mode. Checking what alarm mode is active"
+        	if (alarmState == "armedHome" && alarmtype1 == 1) {
+        		log.debug "Current alarm mode: ${alarmState}.Current HSM alarm mode has been validated. Executing Action."
             	modeNowActive()
                     }
-        	else if (alarmState == "away" && alarmtype1 == 2) {
-        		log.debug "Current alarm mode: ${alarmState}.Current SHM Smartthings alarm mode has been validated. Executing Action."
+        	else if (alarmState == "armedNight" && alarmtype1 == 2) {
+        		log.debug "Current alarm mode: ${alarmState}.Current HSM alarm mode has been validated. Executing Action."
             	modeNowActive()
         	}
-            else if (alarmState == "off" && alarmtype1 == 3) {
-        		log.debug "Current alarm mode: ${alarmState}.Current SHM Smartthings alarm mode has been validated. Executing Action."
+            else if (alarmState == "disarmed" && alarmtype1 == 3) {
+        		log.debug "Current alarm mode: ${alarmState}.Current HSM alarm mode has been validated. Executing Action."
             	modeNowActive()
         	}
             else {
@@ -830,27 +762,6 @@ def modeTriggerEvt(evt){
 	        runIn((5), initialize)
             }
     	}
-	else if (adtUseState) {
-    	def alarmState = panel.currentSecuritySystemStatus
-        	log.debug "Identified to use ADT Alarm Mode. Checking what alarm mode is active"
-        	if (alarmState == "armedStay" && alarmtype2 == 1) {
-        		log.debug "Current alarm mode: ${alarmState}.Current ADT Smartthings alarm mode has been validated. Executing Action."
-				modeNowActive()
-            }
-        	else if (alarmState == "armedAway" && alarmtype2 == 2) {
-        		log.debug "Current alarm mode: ${alarmState}.Current ADT Smartthings alarm mode has been validated. Executing Action."
-				modeNowActive()
-        	}
-        	else if (alarmState == "disarmed" && alarmtype2 == 3) {
-        		log.debug "Current alarm mode: ${alarmState}.Current ADT Smartthings alarm mode has been validated. Executing Action."
-				modeNowActive()
-        	}
-            else {
-            log.debug "Current alarm mode: ${alarmState}. Current alarm setup value: ${alarmtype2}. This is not a valid match. Mode will not execute"
-            unsubscribe()
-        	runIn((5), initialize)
-            }
-        }
     else if (stmode) {
     	def curMode = location.currentMode
         log.debug "These modes were configured and are ${stmode} are being reviewed."
@@ -862,29 +773,11 @@ def modeTriggerEvt(evt){
             }
 /*    		} */
             else {
-            log.debug "No longer in proper ST Mode for integration reseting app. Smartthing modes is  ${curMode} does not match ${stmode}."
+            log.debug "No longer in proper ST Mode for integration reseting app. Hubitat modes is  ${curMode} does not match ${stmode}."
             unsubscribe()
         	runIn((5), initialize)
             }
     }
-/*    else if (timeSetup) {
-    	def df = new java.text.SimpleDateFormat("EEEE")
-		    df.setTimeZone(location.timeZone)
-		    def day = df.format(new Date())
-		    def dayCheck = days.contains(day)
-		    if (dayCheck) {
-	   	 	def between = timeOfDayIsBetween(fromTime, toTime, new Date(), location.timeZone)
-			if (between) {        	
-    			log.debug "Time Validation successfull"
-			modeNowActive()
-    	}
-        }
-        	else {
-            log.debug "Time did not validate. No caction"
-            unsubscribe()
-			initialize()
-            }
-            } */
 	else if (virtualSwitch) {
     	def check = virtualSwitch.currentSwitch
 			if (check != "off") {        	
@@ -895,7 +788,6 @@ def modeTriggerEvt(evt){
     	log.debug "Virtual swtich is off and not in proper state for mode"
 		unsubscribe()
         runIn((5), initialize)
-//		initialize()
             }
     }
     else if (generalRule){
@@ -903,32 +795,22 @@ def modeTriggerEvt(evt){
 		modeNowActive()
     }
     else {
-    log.debug "Smartthings in not in applicable conditions for mode to apply."
+    log.debug "Hubitat not in applicable conditions for mode to apply."
             unsubscribe()
         	runIn((5), initialize)
     }
 }
+
+def cameraReset() {
+    cameras?.off()
+    }
 
 def modeAction(evt){
 		log.debug "Ruleset 1 event"
     	if (recordCameras) {
         	cameras.each {
                 it?.on()
-/*        	def camaraSatus = it.currentClipStatus
-            log.debug "Camera Status is ${camaraSatus}"
-            if (camaraSatus == "Completed") 
-        	{
-       	log.debug "Camera is not recording. Submitting clip to record."
-    		arloCapture() 
-    		}
-            else if (camaraSatus == "Initiated") 
-        	{
-        	log.debug "Camera is active and recording can not be submitted."
-    		} 
-            else {
-            log.debug "Could not check camera status. Submiting Record"
-            arloCapture()
-            } */
+                runIn((5), cameraReset)
             }
             }
         if (lightAction1) {
@@ -986,17 +868,6 @@ def alarmActionOff()
 def arloCapture() {	
 	log.debug "Sending cameras message to record with 1 min capture"
     switcheSet1?.on()
-/*    Date start = new Date()
-    Date end = new Date() 
-    use( TimeCategory ) {
-    	end = start + clipLength.seconds
- 	}
-    log.debug "Capturing at ${start} to ${end}..."
-    cameras.capture(start, start, end)
-        use( TimeCategory ) {
-    	start = start + clipLength.seconds
- 	}
-*/
 }
 
 def sendnotification() {
@@ -1022,8 +893,7 @@ def msg = message
     if (settings.sendPush) {
         log.debug("Sending Push to everyone")
         sendPush(msg)
-    }
-//def noteTime = now()    
+    }    
     sendNotificationEvent(msg)	
         if (settings.notifyRepeat)
 	{
@@ -1111,25 +981,31 @@ def lightActionChk() {
     
 // Create Routines for ruleset 2
 
+def cameraReset2() {
+    cameras2?.off()
+    }
+
 def modeAction2(evt){
 		log.debug "Ruleset2 event"
     	if (recordCameras2) {
         	cameras2.each {
-        	def camaraSatus2 = it.currentClipStatus
-            log.debug "Camera Status is ${camaraSatus2}"
-            if (camaraSatus2 == "Completed") 
+                it?.on()
+                runIn((5), cameraReset2)
+/*        	def camaraSatus = it.currentClipStatus
+            log.debug "Camera Status is ${camaraSatus}"
+            if (camaraSatus == "Completed") 
         	{
-        	log.debug "Camera is not recording. Submitting clip to record."
-    		arloCapture2()
+       	log.debug "Camera is not recording. Submitting clip to record."
+    		arloCapture() 
     		}
-/*            else if (camaraSatus2 == "Initiated") 
+            else if (camaraSatus == "Initiated") 
         	{
         	log.debug "Camera is active and recording can not be submitted."
-    		} */
+    		} 
             else {
             log.debug "Could not check camera status. Submiting Record"
-            arloCapture2()
-            }
+            arloCapture()
+            } */
             }
             }
         if (lightAction2) {
@@ -1308,25 +1184,31 @@ def lightActionChk2() {
 
 //Rule set 3 routines
 
+def cameraReset3() {
+    cameras3?.off()
+    }
+
 def modeAction3(evt){
 		log.debug "Ruleset 3 event"
     	if (recordCameras3) {
         	cameras3.each {
-        	def camaraSatus3 = it.currentClipStatus
-            log.debug "Camera Status is ${camaraSatus3}"
-            if (camaraSatus3 == "Completed") 
+                it?.on()
+                runIn((5), cameraReset3)
+/*        	def camaraSatus = it.currentClipStatus
+            log.debug "Camera Status is ${camaraSatus}"
+            if (camaraSatus == "Completed") 
         	{
-        	log.debug "Camera is not recording. Submitting clip to record."
-    		arloCapture3()
+       	log.debug "Camera is not recording. Submitting clip to record."
+    		arloCapture() 
     		}
-/*            else if (camaraSatus3 == "Initiated") 
+            else if (camaraSatus == "Initiated") 
         	{
         	log.debug "Camera is active and recording can not be submitted."
-    		} */
+    		} 
             else {
             log.debug "Could not check camera status. Submiting Record"
-            arloCapture3()
-            }
+            arloCapture()
+            } */
             }
             }
         if (lightAction3) {
@@ -1505,25 +1387,31 @@ def lightActionChk3() {
     
 // Ruleset 4 Methods
 
+def cameraReset4() {
+    cameras4?.off()
+    }
+
 def modeAction4(evt){
 		log.debug "Ruleset 4 event"
     	if (recordCameras4) {
         	cameras4.each {
-        	def camaraSatus4 = it.currentClipStatus
-            log.debug "Camera Status is ${camaraSatus4}"
-            if (camaraSatus4 == "Completed") 
+                it?.on()
+                runIn((5), cameraReset4)
+/*        	def camaraSatus = it.currentClipStatus
+            log.debug "Camera Status is ${camaraSatus}"
+            if (camaraSatus == "Completed") 
         	{
-        	log.debug "Camera is not recording. Submitting clip to record."
-    		arloCapture4()
+       	log.debug "Camera is not recording. Submitting clip to record."
+    		arloCapture() 
     		}
-/*            else if (camaraSatus4 == "Initiated") 
+            else if (camaraSatus == "Initiated") 
         	{
         	log.debug "Camera is active and recording can not be submitted."
-    		} */
+    		} 
             else {
             log.debug "Could not check camera status. Submiting Record"
-            arloCapture4()
-            }
+            arloCapture()
+            } */
             }
             }
         if (lightAction4) {
@@ -1702,26 +1590,31 @@ def lightActionChk4() {
     
 // Methods for Ruleset 5    
 
+def cameraReset5() {
+    cameras5?.off()
+    }
 
 def modeAction5(evt){
 		log.debug "Ruleset 5 event"
     	if (recordCameras5) {
         	cameras5.each {
-        	def camaraSatus5 = it.currentClipStatus
-            log.debug "Camera Status is ${camaraSatus5}"
-            if (camaraSatus5 == "Completed") 
+                it?.on()
+                runIn((5), cameraReset5)
+/*        	def camaraSatus = it.currentClipStatus
+            log.debug "Camera Status is ${camaraSatus}"
+            if (camaraSatus == "Completed") 
         	{
-        	log.debug "Camera is not recording. Submitting clip to record."
-    		arloCapture5()
+       	log.debug "Camera is not recording. Submitting clip to record."
+    		arloCapture() 
     		}
-/*            else if (camaraSatus5 == "Initiated") 
+            else if (camaraSatus == "Initiated") 
         	{
         	log.debug "Camera is active and recording can not be submitted."
-    		} */
+    		} 
             else {
             log.debug "Could not check camera status. Submiting Record"
-            arloCapture5()
-            }
+            arloCapture()
+            } */
             }
             }
         if (lightAction5) {
