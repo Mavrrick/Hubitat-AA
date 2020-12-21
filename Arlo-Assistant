@@ -49,13 +49,8 @@ def mainPage()
          }
 		section ("Arlo Assistant Management"){
 		href "arloModeSetup", title: "Arlo Asistant Mode Management", description: "Create Custom Hubitat Arlo integration Modes."
-        href "arloCameraMan", title: "Arlo Camera Management", description: "Create rules around camera management."
-//			app(name: "arloTriggerRecord", appName: "Arlo Triggered Record", namespace: "Mavrrick", title: "Create a triggered event that will create recording", multiple: true)
-//            app(name: "arloTriggerRecordRepeat", appName: "Arlo Triggered Repeat Recorder", namespace: "Mavrrick", title: "Create a triggered event that will record until the event is over", multiple: true)            
-            }
-/*        section ("Arlo Camera Management"){
-            app(name: "arloImageRefresh", appName: "Arlo Image/Clip Refresh", namespace: "Mavrrick", title: "Generate a clip to refresh the image tile on the camera", multiple: true)
-		} */
+//        href "arloCameraMan", title: "Arlo Camera Management", description: "Create rules around camera management."
+        }
         section ("Arlo Assistant About"){
         href "about", title: "Arlo Asistant About", description: "Arlo Asistant About"
         }
@@ -68,7 +63,7 @@ def arloModeSetup()
 	{
 // The parent app preferences are pretty simple: just use the app input for the child app.
         section ("Arlo Hubitat Mode management"){
-			app(name: "arloSmartthingsMode", appName: "Arlo Smartthings Mode", namespace: "Mavrrick", title: "Create Arlo Hubitat integration Mode", multiple: true)
+			app(name: "arloHubitatMode", appName: "Arlo Hubitat Mode", namespace: "Mavrrick", title: "Create Arlo Hubitat integration Mode", multiple: true)
             }
     }
 }
@@ -96,7 +91,7 @@ def about()
         section("Support locations")
 		{
 			href (name: "thingsAreSmart", style:"embedded", title: "Things That Are Smart Support Page", url: "http://thingsthataresmart.wiki/index.php?title=Arlo_Assistant")
-			href (name: "smtReleaseThd", style:"embedded", title: "Hubitat Community Support Thread", url: "https://community.smartthings.com/t/beta-arlo-assitant-arlo-enhanced-management-from-smartthings/163612")
+//			href (name: "smtReleaseThd", style:"embedded", title: "Hubitat Community Support Thread", url: "https://community.smartthings.com/t/beta-arlo-assitant-arlo-enhanced-management-from-smartthings/163612")
 		}
         section("Support the Project")
 		{
