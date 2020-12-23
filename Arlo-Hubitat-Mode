@@ -83,13 +83,13 @@ def modeDefine()
 
 		section("Defin Time criteria")
 		{
-            paragraph "If you use the time values please use it alone. It is not currently setup to work with the ST Mode or alarm state."
+            paragraph "If you use the time values please use it alone. It is not currently setup to work with the Hubitat Mode or HSM alarm state."
             input "timeSetup", "enum", title: "Type of time rule to setup", required: false, multiple: false, options: ["Time": "Time", "Sunrise": "Sunrise/Sunset"] 
    			href "modeTimeSetup", title: "Click here to setup your time options", description: "Click here to setup your time options"
 		}
         section("Define virtual Switch")
         {
-            paragraph "If you use a virtual switch please configure it by its self. It is not currently setup to work with the ST Mode or alarm state."
+            paragraph "If you use a virtual switch please configure it by its self. It is not currently setup to work with the Hubitat Mode or HSM alarm state."
             input "virtualSwitch", "capability.switch", title: "Add virtual switch for mode.", required: false, multiple: false
         }
         section("Is this a general rule")
@@ -178,19 +178,20 @@ def modeRulesetSetup()
             input "alarmAction1", "bool", title: "Enable Alarm action for this mode", description: "This switch will tell the mode to run the Alarm action.", defaultValue: false, required: true, multiple: false
        		paragraph "Valid alarm types are 1= Siren, 2=Strobe, and 3=Both. All other numberical valudes wil be ignored."
         	input "alarmActionType1", "number", title: "What type of alarm do you want to trigger from?", required: false, range:"1..3", defaultValue: 1        
-			input "alarmSiren1", "capability.alarm", title: "Set these lights to the specified value below", multiple: true, required: false
+			input "alarmSiren1", "capability.alarm", title: "Use these Alarm sirens when triggered", multiple: true, required: false
         	input "alarmDuration1", "number", title: "How many minutes should the alarm stay on for?", required: false, range:"1..15", defaultValue: 1        
 			paragraph "Please define notification setup for Ruleset 1"
             input "notifyEnable", "bool", title: "Do you want to use this mode to send notifications.", required: false
         	input "message", "text", title: "Send this message if activity is detected.", required: false
-        	paragraph "Multiple numbers can be entered as long as sperated by a (;)"
+            input "notifiers", "capability.notification", multiple: true, submitOnChange: true, width: 6, required: false 
+/*        	paragraph "Multiple numbers can be entered as long as sperated by a (;)"
 //			input("recipients", "contact", title: "Send notifications to?") {
 			input "phone", "phone", title: "Enter a phone number to get SMS.", required: false
-			paragraph "If outside the US please make sure to enter the proper country code."
+			paragraph "If outside the US please make sure to enter the proper country code." */
    			input "sendPush", "bool", title: "Send Push notifications to everyone?", description: "This will tell Arlo Assistant to send out push notifications to all users of the location", defaultValue: false, required: true, multiple: false
-//            }
             input "notifyTimeout", "number", title: "Minimum seconds between messages", required: false, defaultValue: 1 
-		}
+            	paragraph "A 'HelloHome' notification is always sent to the Location Event log"
+        }
 		if (settings.numOfSets > 1){
        		section("Ruleset 2"){
         	paragraph "Please select triggers for Ruleset 2" 
@@ -221,13 +222,14 @@ def modeRulesetSetup()
 			paragraph "Please define notification setup for Ruleset 2"
             input "notifyEnable2", "bool", title: "Do you want to use this mode to send notifications.", required: false
         	input "message2", "text", title: "Send this message if activity is detected.", required: false
-        	paragraph "Multiple numbers can be entered as long as sperated by a (;)"
-			input ("recipients2", "contact", title: "Send notifications to?") {
-			input "phone2", "phone", title: "Enter a phone number to get SMS.", required: false
-			paragraph "If outside the US please make sure to enter the proper country code."
+            input "notifiers2", "capability.notification", multiple: true, submitOnChange: true, width: 6, required: false 
+/*        	paragraph "Multiple numbers can be entered as long as sperated by a (;)"
+//			input("recipients", "contact", title: "Send notifications to?") {
+			input "phone", "phone", title: "Enter a phone number to get SMS.", required: false
+			paragraph "If outside the US please make sure to enter the proper country code." */
    			input "sendPush2", "bool", title: "Send Push notifications to everyone?", description: "This will tell Arlo Assistant to send out push notifications to all users of the location", defaultValue: false, required: true, multiple: false
-            }
-            input "notifyTimeout2", "number", title: "Minimum seconds between messages", required: false, defaultValue: 1        	
+            input "notifyTimeout2", "number", title: "Minimum seconds between messages", required: false, defaultValue: 1 
+            	paragraph "A 'HelloHome' notification is always sent to the Location Event log"
         }
         }
         		if (settings.numOfSets > 2){
@@ -260,13 +262,14 @@ def modeRulesetSetup()
 			paragraph "Please define notification setup for Ruleset 3"
             input "notifyEnable3", "bool", title: "Do you want to use this mode to send notifications.", required: false
         	input "message3", "text", title: "Send this message if activity is detected.", required: false
-        	paragraph "Multiple numbers can be entered as long as sperated by a (;)"
-			input ("recipients3", "contact", title: "Send notifications to?") {
-			input "phone3", "phone", title: "Enter a phone number to get SMS.", required: false
-			paragraph "If outside the US please make sure to enter the proper country code."
+            input "notifiers3", "capability.notification", multiple: true, submitOnChange: true, width: 6, required: false 
+/*        	paragraph "Multiple numbers can be entered as long as sperated by a (;)"
+//			input("recipients", "contact", title: "Send notifications to?") {
+			input "phone", "phone", title: "Enter a phone number to get SMS.", required: false
+			paragraph "If outside the US please make sure to enter the proper country code." */
    			input "sendPush3", "bool", title: "Send Push notifications to everyone?", description: "This will tell Arlo Assistant to send out push notifications to all users of the location", defaultValue: false, required: true, multiple: false
-            }
-            input "notifyTimeout3", "number", title: "Minimum seconds between messages", required: false, defaultValue: 1        	
+            input "notifyTimeout3", "number", title: "Minimum seconds between messages", required: false, defaultValue: 1 
+            	paragraph "A 'HelloHome' notification is always sent to the Location Event log"
         }
         }
             if (settings.numOfSets > 3){
@@ -299,13 +302,14 @@ def modeRulesetSetup()
 			paragraph "Please define notification setup for Ruleset 4"
             input "notifyEnable4", "bool", title: "Do you want to use this mode to send notifications.", required: false
         	input "message4", "text", title: "Send this message if activity is detected.", required: false
-        	paragraph "Multiple numbers can be entered as long as sperated by a (;)"
-			input ("recipients4", "contact", title: "Send notifications to?") {
-			input "phone4", "phone", title: "Enter a phone number to get SMS.", required: false
-			paragraph "If outside the US please make sure to enter the proper country code."
+            input "notifiers4", "capability.notification", multiple: true, submitOnChange: true, width: 6, required: false 
+/*        	paragraph "Multiple numbers can be entered as long as sperated by a (;)"
+//			input("recipients", "contact", title: "Send notifications to?") {
+			input "phone", "phone", title: "Enter a phone number to get SMS.", required: false
+			paragraph "If outside the US please make sure to enter the proper country code." */
    			input "sendPush4", "bool", title: "Send Push notifications to everyone?", description: "This will tell Arlo Assistant to send out push notifications to all users of the location", defaultValue: false, required: true, multiple: false
-            }
-            input "notifyTimeout4", "number", title: "Minimum seconds between messages", required: false, defaultValue: 1        	
+            input "notifyTimeout4", "number", title: "Minimum seconds between messages", required: false, defaultValue: 1 
+            	paragraph "A 'HelloHome' notification is always sent to the Location Event log"
         }
         }
             if (settings.numOfSets > 4){
@@ -338,91 +342,18 @@ def modeRulesetSetup()
 			paragraph "Please define notification setup for Ruleset 5"
             input "notifyEnable5", "bool", title: "Do you want to use this mode to send notifications.", required: false
         	input "message5", "text", title: "Send this message if activity is detected.", required: false
-        	paragraph "Multiple numbers can be entered as long as sperated by a (;)"
-			input ("recipients5", "contact", title: "Send notifications to?") {
-			input "phone5", "phone", title: "Enter a phone number to get SMS.", required: false
-			paragraph "If outside the US please make sure to enter the proper country code."
-   			input "sendPush5", "bool", title: "Send Push notifications to everyone?", description: "This will tell Arlo Assistant to send out push notifications to all users of the location", defaultValue: false, required: true, multiple: false
-            }
-            input "notifyTimeout5", "number", title: "Minimum seconds between messages", required: false, defaultValue: 1         	
-        }
-        }
-	}
-}
-
-
-def modeCameraSetup()
-{
-	dynamicPage(name: "modeCameraSetup", title: "Camera Setup", nextPage: "modeLightsOpt")
-	{
-    	section("Camera ruleset1 setup (Optional)"){
-        	input "recordCameras", "bool", title: "Enable Camera recording?", description: "This switch will enable cameras to record on alarm events.", defaultValue: false, required: true, multiple: false
-			input "cameras", "capability.switch", multiple: true, required: false
-//        	input name: "clipLength", type: "number", title: "Clip Length", description: "Please enter the length of each recording.", required: true, range: "5..120", defaultValue: 120
-		}
-        section ("Return to Arlo Assistant Main page"){
-            href "mainPage", title: "Return to the previous menu", description: "Return to the previous menu to complete setup."            
-		}
-	} 
-}
-
-def modeLightsOpt()
-{
-	dynamicPage(name: "modeLightsOpt", title: "Optional Light Setup", nextPage: "modeAlarmSetup")
-    {
-    	section("Light Activation options"){
-        input "lightAction1", "bool", title: "Enable Light action for this mode", description: "This switch will tell the mode to run the light action.", defaultValue: false, required: true, multiple: false
-		input "switcheSet1", "capability.switch", title: "These lights will be activated with the action", multiple: true, required: false
-		input "switchLevel1", "capability.switchLevel", title: "Set these lights to the specified value below", multiple: true, required: false
-		input "switchLevelChg1", "number", title: "What level do you want your lights set at.", required: true, range: "1..100", defaultValue: 100
-        input "lightShutOff", "bool", title: "Enable this option to turn off the light automatically", description: "This switch will schedule a check to turn the lights off", defaultValue: false, required: true, multiple: false        
-        input "lightShutOffTime", "number", title: "How many minutes to wait before turning off the lights", required: true, range: "1..90", defaultValue: 5
-		}		
-        section ("Return to Arlo Assistant Main page"){
-            href "mainPage", title: "Return to the previous menu", description: "Return to the previous menu to complete setup."            
-		}
-	}
-}
-
-def modeAlarmSetup()
-{
-	dynamicPage(name: "modeAlarmSetup", title: "Optional Alarm Setup", nextPage: "notificationSetup")
-    {
-    	section("Setup your alarm options"){
-        input "alarmAction1", "bool", title: "Enable Alarm action for this mode", description: "This switch will tell the mode to run the Alarm action.", defaultValue: false, required: true, multiple: false
-       	paragraph "Valid alarm types are 1= Siren, 2=Strobe, and 3=Both. All other numberical valudes wil be ignored."
-        input "alarmActionType1", "number", title: "What type of alarm do you want to trigger from?", required: false, range:"1..3", defaultValue: 1        
-		input "alarmSiren1", "capability.alarm", title: "Set these lights to the specified value below", multiple: true, required: false
-        input "alarmDuration1", "number", title: "How many minutes should the alarm stay on for?", required: false, range:"1..15", defaultValue: 1        
-		}		
-        section ("Return to Arlo Assistant Main page"){
-            href "mainPage", title: "Return to the previous menu", description: "Return to the previous menu to complete setup."            
-		}
-	}
-}
-
-def notificationSetup()
-{
-	dynamicPage(name: "notificationSetup", title: "Notification setup", nextPage: "mainPage")
-	{
-        section("Via a push notification and/or an SMS message"){
-        input "notifyEnable", "bool", title: "Do you want to use this mode to send notifications.", required: false
-        input "message", "text", title: "Send this message if activity is detected.", required: false
-        }
-        section("Via a push notification and/or an SMS message?"){
-        	paragraph "Multiple numbers can be entered as long as sperated by a (;)"
-			input("recipients", "contact", title: "Send notifications to?") {
+            input "notifiers5", "capability.notification", multiple: true, submitOnChange: true, width: 6, required: false 
+/*        	paragraph "Multiple numbers can be entered as long as sperated by a (;)"
+//			input("recipients", "contact", title: "Send notifications to?") {
 			input "phone", "phone", title: "Enter a phone number to get SMS.", required: false
-			paragraph "If outside the US please make sure to enter the proper country code."
-   			input "sendPush", "bool", title: "Send Push notifications to everyone?", description: "This will tell ADT Tools to send out push notifications to all users of the location", defaultValue: false, required: true, multiple: false
-		}
-	}
-		section("Message repeat options") {
-			input "notifyTimeout", "number", title: "Minimum time between messages", required: false
-	}
+			paragraph "If outside the US please make sure to enter the proper country code." */
+   			input "sendPush5", "bool", title: "Send Push notifications to everyone?", description: "This will tell Arlo Assistant to send out push notifications to all users of the location", defaultValue: false, required: true, multiple: false
+            input "notifyTimeout5", "number", title: "Minimum seconds between messages", required: false, defaultValue: 1 
+            	paragraph "A 'HelloHome' notification is always sent to the Location Event log"
+        }
+        }
 	}
 }
-
 
 
 def installed() {
@@ -810,7 +741,6 @@ def modeAction(evt){
     	if (recordCameras) {
         	cameras.each {
                 it?.on()
-                runIn((5), cameraReset)
             }
             }
         if (lightAction1) {
@@ -825,13 +755,14 @@ def modeAction(evt){
         	log.debug "${new Date(state.noteTime)}"
         	log.debug "${timePassed}"
             if (timePassed > notifyTimeout*1000){
-    		sendnotification()
+            sendnotification()
             state.noteTime = now()
             	}
             else {
             log.debug "Not enogh time has passed. No notification is sent"
             	}
             }
+        runIn((5), cameraReset)
             }
 
 def alarmActionOn()    
@@ -870,14 +801,14 @@ def arloCapture() {
     switcheSet1?.on()
 }
 
-def sendnotification() {
+ def sendnotification() {
 def msg = message
         if ( msg == null ) {
         	log.debug "Message not configured. Skipping notification"
             }
         else {
         log.debug "Alarm Notification., '$msg'"
-/*        log.debug "$evt.name:$evt.value, pushAndPhone:$pushAndPhone, '$msg'" */
+//        log.debug "$evt.name:$evt.value, pushAndPhone:$pushAndPhone, '$msg'" 
    if (phone) { // check that the user did select a phone number
         if ( phone.indexOf(";") > 0){
             def phones = phone.split(";")
@@ -892,16 +823,19 @@ def msg = message
     } 
     if (settings.sendPush) {
         log.debug("Sending Push to everyone")
-        sendPush(msg)
-    }    
-    sendNotificationEvent(msg)	
+//        sendPushMessage(msg)
+        notifiers?.deviceNotification(msg)
+        log.debug("Send Hello Home Message")
+		sendLocationEvent(name: "HelloHome", descriptionText: message, value: app.label, type: 'APP_NOTIFICATION')
+    } 
+//    sendNotifications(msgPrefix, msg)	
         if (settings.notifyRepeat)
 	{
 		runIn((msgrepeat * 60) , notifyRepeatChk)
 	}
 }
-}
-        
+} 
+
 def lightAction(){
 		switcheSet1?.on()
         if (switchLevel1) {
@@ -934,7 +868,7 @@ def lightActionChk() {
 	} */
 	if (motion) {
 		motion.each {
-        	def satus = it.currentContact
+        	def satus = it.currentMotion
     		log.debug "motion is in ${satus} state"
             if (satus == "on") {
         		log.debug("Motion is still active. Leaving Light on")
@@ -990,22 +924,6 @@ def modeAction2(evt){
     	if (recordCameras2) {
         	cameras2.each {
                 it?.on()
-                runIn((5), cameraReset2)
-/*        	def camaraSatus = it.currentClipStatus
-            log.debug "Camera Status is ${camaraSatus}"
-            if (camaraSatus == "Completed") 
-        	{
-       	log.debug "Camera is not recording. Submitting clip to record."
-    		arloCapture() 
-    		}
-            else if (camaraSatus == "Initiated") 
-        	{
-        	log.debug "Camera is active and recording can not be submitted."
-    		} 
-            else {
-            log.debug "Could not check camera status. Submiting Record"
-            arloCapture()
-            } */
             }
             }
         if (lightAction2) {
@@ -1027,6 +945,7 @@ def modeAction2(evt){
             log.debug "Not enogh time has passed. No notification is sent"
             	}
             }
+        runIn((5), cameraReset2)
             }
 
 def alarmActionOn2()    
@@ -1094,10 +1013,12 @@ def msg2 = message2
     } 
     if (settings.sendPush2) {
         log.debug("Sending Push to everyone")
-        sendPush(msg2)
-    }
-//def noteTime = now()    
-    sendNotificationEvent(msg2)	
+//        sendPushMessage(msg)
+        notifiers2?.deviceNotification(msg2)
+        log.debug("Send Hello Home Message")
+		sendLocationEvent(name: "HelloHome", descriptionText: message2, value: app.label, type: 'APP_NOTIFICATION')
+    } 
+//    sendNotifications(msgPrefix, msg)	
         if (settings.notifyRepeat2)
 	{
 		runIn((msgrepeat2 * 60) , notifyRepeatChk2)
@@ -1193,22 +1114,7 @@ def modeAction3(evt){
     	if (recordCameras3) {
         	cameras3.each {
                 it?.on()
-                runIn((5), cameraReset3)
-/*        	def camaraSatus = it.currentClipStatus
-            log.debug "Camera Status is ${camaraSatus}"
-            if (camaraSatus == "Completed") 
-        	{
-       	log.debug "Camera is not recording. Submitting clip to record."
-    		arloCapture() 
-    		}
-            else if (camaraSatus == "Initiated") 
-        	{
-        	log.debug "Camera is active and recording can not be submitted."
-    		} 
-            else {
-            log.debug "Could not check camera status. Submiting Record"
-            arloCapture()
-            } */
+//                runIn((5), cameraReset3)
             }
             }
         if (lightAction3) {
@@ -1230,6 +1136,7 @@ def modeAction3(evt){
             log.debug "Not enogh time has passed. No notification is sent"
             	}
             }
+        runIn((5), cameraReset3)
             }
 
 def alarmActionOn3()    
@@ -1297,10 +1204,12 @@ def msg3 = message3
     } 
     if (settings.sendPush3) {
         log.debug("Sending Push to everyone")
-        sendPush(msg3)
-    }
-//def noteTime = now()    
-    sendNotificationEvent(msg3)	
+ //        sendPushMessage(msg)
+        notifiers3?.deviceNotification(msg3)
+        log.debug("Send Hello Home Message")
+		sendLocationEvent(name: "HelloHome", descriptionText: message3, value: app.label, type: 'APP_NOTIFICATION')
+    } 
+//    sendNotifications(msgPrefix, msg)	
         if (settings.notifyRepeat3)
 	{
 		runIn((msgrepeat3 * 60) , notifyRepeatChk3)
@@ -1396,22 +1305,7 @@ def modeAction4(evt){
     	if (recordCameras4) {
         	cameras4.each {
                 it?.on()
-                runIn((5), cameraReset4)
-/*        	def camaraSatus = it.currentClipStatus
-            log.debug "Camera Status is ${camaraSatus}"
-            if (camaraSatus == "Completed") 
-        	{
-       	log.debug "Camera is not recording. Submitting clip to record."
-    		arloCapture() 
-    		}
-            else if (camaraSatus == "Initiated") 
-        	{
-        	log.debug "Camera is active and recording can not be submitted."
-    		} 
-            else {
-            log.debug "Could not check camera status. Submiting Record"
-            arloCapture()
-            } */
+//                runIn((5), cameraReset4)
             }
             }
         if (lightAction4) {
@@ -1433,6 +1327,7 @@ def modeAction4(evt){
             log.debug "Not enogh time has passed. No notification is sent"
             	}
             }
+        runIn((5), cameraReset4)
             }
 
 def alarmActionOn4()    
@@ -1500,10 +1395,12 @@ def msg4 = message4
     } 
     if (settings.sendPush4) {
         log.debug("Sending Push to everyone")
-        sendPush(msg4)
-    }
-//def noteTime = now()    
-    sendNotificationEvent(msg4)	
+//        sendPushMessage(msg)
+        notifiers4?.deviceNotification(msg4)
+        log.debug("Send Hello Home Message")
+		sendLocationEvent(name: "HelloHome", descriptionText: message4, value: app.label, type: 'APP_NOTIFICATION')
+    } 
+//    sendNotifications(msgPrefix, msg)	
         if (settings.notifyRepeat4)
 	{
 		runIn((msgrepeat4 * 60) , notifyRepeatChk4)
@@ -1599,22 +1496,7 @@ def modeAction5(evt){
     	if (recordCameras5) {
         	cameras5.each {
                 it?.on()
-                runIn((5), cameraReset5)
-/*        	def camaraSatus = it.currentClipStatus
-            log.debug "Camera Status is ${camaraSatus}"
-            if (camaraSatus == "Completed") 
-        	{
-       	log.debug "Camera is not recording. Submitting clip to record."
-    		arloCapture() 
-    		}
-            else if (camaraSatus == "Initiated") 
-        	{
-        	log.debug "Camera is active and recording can not be submitted."
-    		} 
-            else {
-            log.debug "Could not check camera status. Submiting Record"
-            arloCapture()
-            } */
+//                runIn((5), cameraReset5)
             }
             }
         if (lightAction5) {
@@ -1636,6 +1518,7 @@ def modeAction5(evt){
             log.debug "Not enogh time has passed. No notification is sent"
             	}
             }
+        runIn((5), cameraReset5)
             }
 
 def alarmActionOn5()    
@@ -1703,11 +1586,13 @@ def msg5 = message5
     } 
     if (settings.sendPush5) {
         log.debug("Sending Push to everyone")
-        sendPush(msg5)
-    }
-//def noteTime = now()    
-    sendNotificationEvent(msg5)	
-        if (settings.notifyRepeat5)
+//        sendPushMessage(msg)
+        notifiers5?.deviceNotification(msg5)
+        log.debug("Send Hello Home Message")
+		sendLocationEvent(name: "HelloHome", descriptionText: message5, value: app.label, type: 'APP_NOTIFICATION')
+    } 
+//    sendNotifications(msgPrefix, msg)	
+     if (settings.notifyRepeat5)
 	{
 		runIn((msgrepeat5 * 60) , notifyRepeatChk5)
 	}
@@ -1789,4 +1674,4 @@ def lightActionChk5() {
     	log.debug ("no activty found turning off lights")
         		switcheSet5?.off()
 		}
-	}
+	}vvv
