@@ -20,24 +20,25 @@ metadata
 {
 	definition(name: "Arlo Virtual Device", namespace: "mavrrick", author: "Mavrrick", importUrl: "https://tbd.com")
 	{
-		capability "Sensor"
         capability "Motion Sensor"
 		capability "SoundSensor"
-		capability "SignalStrength"
-        capability "HealthCheck"
 		capability "Switch"
 		capability "Battery"
-		capability "Refresh"
         capability "Alarm"
 
 		attribute "healthStatus", 							'STRING'
+        attribute "battery", 							'NUMBER'
+        attribute "alarm", "enum", ["off", "both", "siren", "strobe"]
 
         command "active"
         command "inactive"
+        command "motion", [[name: 'Motion Detected', type: 'ENUM',   constraints: ["active", "inactive"]]]  
+        command "alarm", [[name: 'Alarm Status', type: 'ENUM',   constraints: ["off", "both", "siren", "strobe"]]]  
         command "disarm"
         command "battery", [[name: "Battery Level", type: "NUMBER", description: "Battery Percent full(0 to 100)"]]
         command "sound", [[name: 'Sound Detected', type: 'ENUM',   constraints: ["detected", "not detected"]]]
         command "healthcheck", [[name: 'Status of Camera', type: 'ENUM',   constraints: ["online", "offline"]]]
+
 	}
 }
 
@@ -131,7 +132,8 @@ def off()
 	sendEvent(name: "switch", value: "off")
 }
 
-def motion(){
+def motion(parm){
+        sendEvent(name: "motion", value: parm)
     }
 
 
@@ -152,6 +154,15 @@ def active(){
 def inactive(){
     sendEvent(name: "motion", value: "inactive")
 }
+
+/* 
+    Alarm Command
+
+*/
+def alarm(parm){
+    sendEvent(name: "alarm", value: parm)
+}
+
 
 /* 
     both
@@ -216,4 +227,3 @@ def sound(parm){
 def healthcheck(parm){
     sendEvent(name: "healthStatus", value: parm)
     }
-
